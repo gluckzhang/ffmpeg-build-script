@@ -349,44 +349,25 @@ if build "av1"; then
 	build_done "av1"
 fi
 
-if build "zlib"; then
-	download "https://www.zlib.net/zlib-1.2.11.tar.gz" "zlib-1.2.11.tar.gz"
-	cd $PACKAGES/zlib-1.2.11 || exit
-	execute ./configure --prefix=${WORKSPACE}
-	execute make -j $MJOBS
-	execute make install
-	build_done "zlib"
-fi
-
-if build "openssl"; then
-	download "https://www.openssl.org/source/openssl-1.1.1d.tar.gz" "openssl-1.1.1d.tar.gz"
-	cd $PACKAGES/openssl-1.1.1d || exit
-	execute ./config --prefix=${WORKSPACE} --openssldir=${WORKSPACE} --with-zlib-include=${WORKSPACE}/include/ --with-zlib-lib=${WORKSPACE}/lib no-shared zlib
-	execute make -j $MJOBS
-	execute make install
-	build_done "openssl"
-fi
-
 build "ffmpeg"
-download "https://git.ffmpeg.org/gitweb/ffmpeg.git/snapshot/47773f7979d77c1fcd08b57e85af1ad08d9248c8.tar.gz" "ffmpeg-snapshot.tar.bz2"
-cd $PACKAGES/ffmpeg-47773f7/ || exit
+download "https://ffmpeg.org/releases/ffmpeg-4.2.tar.bz2" "ffmpeg-4.2.tar.bz2"
+cd $PACKAGES/ffmpeg-4.2/ || exit
 ./configure $ADDITIONAL_CONFIGURE_OPTIONS \
     --pkgconfigdir="$WORKSPACE/lib/pkgconfig" \
     --prefix=${WORKSPACE} \
     --pkg-config-flags="--static" \
-    --extra-cflags="-I$WORKSPACE/include" \
+    --extra-cflags="-I$WORKSPACE/include -g" \
     --extra-ldflags="-L$WORKSPACE/lib" \
-    --extra-libs="-lpthread -lm" \
 	--enable-static \
-	--disable-debug \
+	--enable-debug \
 	--disable-shared \
 	--disable-ffplay \
 	--disable-doc \
-	--enable-openssl \
+	--disable-zlib \
+	--disable-pthreads \
 	--enable-gpl \
 	--enable-version3 \
 	--enable-nonfree \
-	--enable-pthreads \
 	--enable-libvpx \
 	--enable-libmp3lame \
     --enable-libopus \
