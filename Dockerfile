@@ -1,17 +1,19 @@
-FROM ubuntu:18.10
+# fuzzing-competition reference build of ffmpeg4.2 based on ubuntu:16.04
 
-RUN apt-get update \
-    && apt-get -y --no-install-recommends install  build-essential curl g++ ca-certificates libz-dev \
-    && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
-    && update-ca-certificates
+FROM ubuntu:16.04
+LABEL maintainer="Long Zhang <longz@kth.se>"
 
-WORKDIR /app
-COPY ./build-ffmpeg /app/build-ffmpeg
+# install dependencies
+RUN apt-get update -qq && \
+  apt-get -y install autoconf build-essential curl g++ git vim && \
+  apt-get clean all
 
-RUN AUTOINSTALL=yes /app/build-ffmpeg --build
-RUN cp /app/workspace/bin/ffmpeg /usr/bin/ffmpeg
-RUN cp /app/workspace/bin/ffprobe /usr/bin/ffprobe
-RUN /app/build-ffmpeg --cleanup
+WORKDIR /root/
 
-CMD         ["--help"]
-ENTRYPOINT  ["/usr/bin/ffmpeg"]
+# statically build ffmpeg
+RUN git clone https://github.com/gluckzhang/ffmpeg-build-script.git
+RUN cd ./ffmpeg-build-script && \
+  git checkout enable-debug && \
+  AUTOINSTALL=yes ./build-ffmpeg --build
+
+CMD ["bash"]
